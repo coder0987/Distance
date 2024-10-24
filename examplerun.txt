@@ -1,0 +1,227 @@
+                            
+                            
+                            
+                            
+                            
+            OOOOOO          
+            OOOOOO          
+            OO OOO          
+            OOO OO          
+            OOOOOOOOOO      
+             OOOOOOOOO      
+             OOOOOOO        
+             OOOOOO         
+            OOOOO           
+           OOOOOO           
+           OOOOOO           
+          OOOOOOO           
+          OOO OOO           
+          OOO OOO           
+          OOO OOO           
+          OOO OOO           
+              OOO           
+              OOO           
+            OOOOO           
+            OOOO            
+                            
+                            
+                            
+
+Distance Step
+DS Lowest: 556
+DS Distance: 32.91421356237309
+Image:
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+            OOOOOO          |              OOOO          
+            OOOOOO          |             OOOOO          
+            OO OOO          |             OOOOO          
+            OOO OO          |            OOOOOO          
+            OOOOOOOOOO      |            OOOOOO          
+             OOOOOOOOO      |            OOOOOO          
+             OOOOOOO        |            OOOOOO          
+             OOOOOO         |            OOOOO           
+            OOOOO           |            OOOOO           
+           OOOOOO           |            OOOOO           
+           OOOOOO           |            OOOOO           
+          OOOOOOO           |            OOOOO           
+          OOO OOO           |            OOOOO           
+          OOO OOO           |            OOOOO           
+          OOO OOO           |            OOOOO           
+          OOO OOO           |            OOOOOO          
+              OOO           |            OOOOOO          
+              OOO           |            OOOOOO          
+            OOOOO           |            OOOOOO          
+            OOOO            |             OOOO           
+                            |                            
+                            |                            
+                            |                            
+
+Distance Step Removal
+DSR Lowest: 368
+DSR Distance: 126.42694354422139
+Image:
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+                            |           OOOO             
+            OOOOOO          |           OOOOO            
+            OOOOOO          |           OOOOOO           
+            OO OOO          |           OOOOOO           
+            OOO OO          |            OOOOO           
+            OOOOOOOOOO      |            OOOOO OOOOOO    
+             OOOOOOOOO      |            OOOOOOOOOOOO    
+             OOOOOOO        |            OOOOOOOOO       
+             OOOOOO         |            OOOOOOO         
+            OOOOO           |            OOOOO           
+           OOOOOO           |           OOOOOO           
+           OOOOOO           |          OOOOOOO           
+          OOOOOOO           |          OOOOOOO           
+          OOO OOO           |         OOOO OOOO          
+          OOO OOO           |         OOO  OOOO          
+          OOO OOO           |        OOO   OOOO          
+          OOO OOO           |        OOO  OOOOO          
+              OOO           |        OOOOOOOOO           
+              OOO           |        OOOOOOO             
+            OOOOO           |         OOOOO              
+            OOOO            |                            
+                            |                            
+                            |                            
+                            |                            
+
+Euclidean Distance
+ED Lowest: 556
+ED Distance: 6.855654600401044
+Image:
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+            OOOOOO          |              OOOO          
+            OOOOOO          |             OOOOO          
+            OO OOO          |             OOOOO          
+            OOO OO          |            OOOOOO          
+            OOOOOOOOOO      |            OOOOOO          
+             OOOOOOOOO      |            OOOOOO          
+             OOOOOOO        |            OOOOOO          
+             OOOOOO         |            OOOOO           
+            OOOOO           |            OOOOO           
+           OOOOOO           |            OOOOO           
+           OOOOOO           |            OOOOO           
+          OOOOOOO           |            OOOOO           
+          OOO OOO           |            OOOOO           
+          OOO OOO           |            OOOOO           
+          OOO OOO           |            OOOOO           
+          OOO OOO           |            OOOOOO          
+              OOO           |            OOOOOO          
+              OOO           |            OOOOOO          
+            OOOOO           |            OOOOOO          
+            OOOO            |             OOOO           
+                            |                            
+                            |                            
+                            |                            
+
+Pythagorean Distance
+PD Lowest: 979
+PD Distance: 0.15307449617102975
+Image:
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+            OOOOOO          |                            
+            OOOOOO          |            OOOOOO          
+            OO OOO          |           OOOOOOOO         
+            OOO OO          |          OOOOOOOOOO        
+            OOOOOOOOOO      |          OOOO OOOOO        
+             OOOOOOOOO      |          OOO   OOOO        
+             OOOOOOO        |          OOO  OOOOO        
+             OOOOOO         |          OOO OOOOO         
+            OOOOO           |          OOOOOOOOO         
+           OOOOOO           |         OOOOOOOOO          
+           OOOOOO           |          OOOOOOOO          
+          OOOOOOO           |           OOOOOO           
+          OOO OOO           |              OOO           
+          OOO OOO           |              OOO           
+          OOO OOO           |              OOO           
+          OOO OOO           |             OOOO           
+              OOO           |             OOOO           
+              OOO           |             OOOO           
+            OOOOO           |             OOOO           
+            OOOO            |             OOO            
+                            |             OOO            
+                            |                            
+                            |                            
+
+Scaled Dimensional Distance
+SDD Lowest: 260
+SDD Distance: 1.2474463711838062
+Image:
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+            OOOOOO          |                            
+            OOOOOO          |                            
+            OO OOO          |                            
+            OOO OO          |          OO OOOOOOOOO      
+            OOOOOOOOOO      |        OOOO OOOOOOOOOO     
+             OOOOOOOOO      |       OOOO  OO     OOOOO   
+             OOOOOOO        |      OOOO   OOO     OOOO   
+             OOOOOO         |     OOOO             OOO   
+            OOOOO           |     OOO               OO   
+           OOOOOO           |     OO                OO   
+           OOOOOO           |     OO              OOOO   
+          OOOOOOO           |     OO             OOOOO   
+          OOO OOO           |     OO           OOOOO     
+          OOO OOO           |     OOO      OOOOOOOO      
+          OOO OOO           |     OOOOO   OOOOOO         
+          OOO OOO           |        OOOOOOOO            
+              OOO           |          OOOO              
+              OOO           |                            
+            OOOOO           |                            
+            OOOO            |                            
+                            |                            
+                            |                            
+                            |                            
+
+Spherical Distance
+SD Lowest: 661
+SD Distance: 0.8336508706630775
+Image:
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+                            |                            
+            OOOOOO          |                      OOOO  
+            OOOOOO          |                     OOOO   
+            OO OOO          |                    OOOO    
+            OOO OO          |              OOO  OOOO     
+            OOOOOOOOOO      |             OOOO OOOO      
+             OOOOOOOOO      |            OOOO OOOO       
+             OOOOOOO        |           OOOO OOOO        
+             OOOOOO         |          OOOO OOOO         
+            OOOOO           |         OOOO OOOO O        
+           OOOOOO           |         OOO OOOOOOOO       
+           OOOOOO           |        OOOOOOOOOOO         
+          OOOOOOO           |         OOOOOOOO           
+          OOO OOO           |           OOOO             
+          OOO OOO           |          OOO               
+          OOO OOO           |         OOOO               
+          OOO OOO           |        OOOO                
+              OOO           |        OOO                 
+              OOO           |       OOO                  
+            OOOOO           |      OOO                   
+            OOOO            |      OOO                   
+                            |                            
+                            |                            
+                            |                            
+

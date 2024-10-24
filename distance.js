@@ -6,7 +6,56 @@ const ACTIVE = 1;
 const SQRT2 = 1.41421356237;
 
 const IMG_COUNT = 1000;
-const GOAL_IMG = 1;
+const GOAL_IMG = 240;
+
+
+//Sum the distances between each active pixel and the closest active pixel on the other image
+function distanceStep(imgA, imgB) {
+    //Each image is a HEIGHT x WIDTH array of values 0-255
+    let activeA = [];
+    let activeB = [];
+
+    //Create arrays of active pixels
+    for (let r in imgA) {
+        for (let c in imgB) {
+            if (imgA[r][c] == ACTIVE) {
+                activeA.push([r,c]);
+            }
+            if (imgB[r][c] == ACTIVE) {
+                activeB.push([r,c]);
+            }
+        }
+    }
+
+    //For each pixel in A, find the closest active pixel in B and add to the sum
+    let sum = 0;
+    for (let i in activeA) {
+        let cp = 0;
+        let closest = distanceTo(activeA[i],activeB[0]);
+        for (let j in activeB) {
+            let current = distanceTo(activeA[i],activeB[j]);
+            if (current < closest) {
+                closest = current;
+                cp = +j;
+            }
+        }
+        sum += closest;
+    }
+    //Repeat that process in reverse for symmetry
+    for (let i in activeB) {
+        let cp = 0;
+        let closest = distanceTo(activeB[i],activeA[0]);
+        for (let j in activeA) {
+            let current = distanceTo(activeB[i],activeA[j]);
+            if (current < closest) {
+                closest = current;
+                cp = +j;
+            }
+        }
+        sum += closest;
+    }
+    return sum/2;
+}
 
 //Iteratively finds the distance between active pixels, then removes pixels that have been used. Unused pixels count as 2
 function distanceStepRemoval(imgA, imgB) {
@@ -52,6 +101,16 @@ function distanceTo(a, b) {
     return Math.sqrt(Math.pow(+a[0] - +b[0], 2) + Math.pow(+a[1] - +b[1],2));
 }
 
+//Treat each pixel as a dimension, then find the magnitude of the vector distance between the images
+function euclideanDistance(imgA, imgB) {
+    let sum = 0;
+    for (let c = 0; c < WIDTH; c++) {
+        for (let r = 0; r < HEIGHT; r++) {
+            sum += Math.pow(imgA[c][r] - imgB[c][r],2);
+        }
+    }
+    return Math.sqrt(sum);
+}
 
 //Sums the active distances of each pixel, then takes the differences
 //Downside: cannot detect flips along the top-left to bottom-right diagonal
@@ -175,12 +234,29 @@ function printSideBySideBinImg(imgA, imgB) {
 
 function compares() {
     printBinImg(arr_imgs[0])
+    compDS();
     compDSR();
+    compED();
     compPD();
     compSDD();
     compSD();
 }
-
+function compDS() {
+    console.log("Distance Step");
+    let min = 1;
+    let minP = distanceStep(arr_imgs[0], arr_imgs[1]);
+    for (let i=2; i<count; i++) {
+        let d = distanceStep(arr_imgs[0], arr_imgs[i]);
+        if (d < minP) {
+            min = i;
+            minP = d;
+        }
+    }
+    console.log("DS Lowest: " + min);
+    console.log("DS Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
+}
 function compDSR() {
     console.log("Distance Step Removal");
     let min = 1;
@@ -194,6 +270,22 @@ function compDSR() {
     }
     console.log("DSR Lowest: " + min);
     console.log("DSR Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
+}
+function compED() {
+    console.log("Euclidean Distance");
+    let min = 1;
+    let minP = euclideanDistance(arr_imgs[0], arr_imgs[1]);
+    for (let i=2; i<count; i++) {
+        let d = euclideanDistance(arr_imgs[0], arr_imgs[i]);
+        if (d < minP) {
+            min = i;
+            minP = d;
+        }
+    }
+    console.log("ED Lowest: " + min);
+    console.log("ED Distance: " + minP);
     console.log("Image:");
     printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
 }
