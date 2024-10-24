@@ -3,6 +3,10 @@ const fs = require('fs');
 const HEIGHT = 28;
 const WIDTH = 28;
 const ACTIVE = 1;
+const SQRT2 = 1.41421356237;
+
+const IMG_COUNT = 1000;
+const GOAL_IMG = 1;
 
 function distanceStepRemoval(imgA, imgB) {
     //Each image is a HEIGHT x WIDTH array of values 0-255
@@ -73,6 +77,73 @@ function pythagoreanDistance(imgA, imgB) {
     return Math.abs(aDistance - bDistance);
 }
 
+function scaledDimensionalDistance(imgA, imgB) {
+    let aDistance = [0,0,0,0];
+    let bDistance = [0,0,0,0];
+
+    for (let c = 0; c < WIDTH; c++) {
+        let wxw = (WIDTH - c) / WIDTH;
+        let xw = c / WIDTH;
+        for (let r = 0; r < HEIGHT; r++) {
+            if (imgA[c][r] == ACTIVE || imgB[c][r] == ACTIVE) {
+                //Pixel is active
+                let hyh = (HEIGHT - r) / HEIGHT;
+                let yh = r / HEIGHT;
+                if (imgA[c][r] == ACTIVE) {
+                    aDistance[0] += hyh + wxw;
+                    aDistance[1] += hyh + xw;
+                    aDistance[2] += yh + wxw;
+                    aDistance[3] += yh + xw;
+                }
+                if (imgB[c][r] == ACTIVE) {
+                    bDistance[0] += hyh + wxw;
+                    bDistance[1] += hyh + xw;
+                    bDistance[2] += yh + wxw;
+                    bDistance[3] += yh + xw;
+                }
+            }
+        }
+    }
+
+    return Math.sqrt(Math.pow(aDistance[0] - bDistance[0], 2) + Math.pow(aDistance[1] - bDistance[1], 2) + Math.pow(aDistance[2] - bDistance[2], 2) + Math.pow(aDistance[3] - bDistance[3], 2));
+}
+
+function sphericalDistance(imgA, imgB) {
+    let aDistance = [0,0,0];
+    let bDistance = [0,0,0];
+    let pixA = 0;
+    let pixB = 0;
+
+    const HORIZONTAL_FACTOR = (WIDTH * SQRT2);
+    const VERTICAL_FACTOR = (HEIGHT * SQRT2);
+
+    for (let c = 0; c < WIDTH; c++) {
+        let x = c / HORIZONTAL_FACTOR;
+        x2 = x * x;
+        for (let r = 0; r < HEIGHT; r++) {
+            if (imgA[c][r] == ACTIVE || imgB[c][r] == ACTIVE) {
+                //Pixel is active
+                let y = r / VERTICAL_FACTOR;
+                let z = Math.sqrt(1 - y * y - x2);
+                if (imgA[c][r] == ACTIVE) {
+                    pixA++;
+                    aDistance[0] += x;
+                    aDistance[1] += y;
+                    aDistance[2] += z;
+                }
+                if (imgB[c][r] == ACTIVE) {
+                    pixB++;
+                    bDistance[0] += x;
+                    bDistance[1] += y;
+                    bDistance[2] += z;
+                }
+            }
+        }
+    }
+
+    return Math.sqrt(Math.pow(aDistance[0] - bDistance[0], 2) + Math.pow(aDistance[1] - bDistance[1], 2) + Math.pow(aDistance[2] - bDistance[2], 2));
+}
+
 function printBinImg(binImg) {
     let str = '';
     for (let i in binImg[0]) {
@@ -84,9 +155,29 @@ function printBinImg(binImg) {
     console.log(str);
 }
 
+function printSideBySideBinImg(imgA, imgB) {
+    let str = '';
+    for (let i in imgA[0]) {
+        let ts = '';
+        for (let j in imgA) {
+            str += imgA[j][i] ? 'O' : ' ';
+            ts += imgB[j][i] ? 'O' : ' ';
+        }
+        str += '|' + ts + '\n';
+    }
+    console.log(str);
+}
+
 function compares() {
-    //8 images in arr_imgs array
-    console.log("Finding first image's closest neighbor");
+    printBinImg(arr_imgs[0])
+    compDSR();
+    compPD();
+    compSDD();
+    compSD();
+}
+
+function compDSR() {
+    console.log("Distance Step Removal");
     let min = 1;
     let minP = distanceStepRemoval(arr_imgs[0], arr_imgs[1]);
     for (let i=2; i<count; i++) {
@@ -96,11 +187,58 @@ function compares() {
             minP = d;
         }
     }
-    console.log("Lowest: " + min);
-    console.log("Distance: " + minP);
-    console.log("Images:");
-    printBinImg(arr_imgs[0])
-    printBinImg(arr_imgs[min])
+    console.log("DSR Lowest: " + min);
+    console.log("DSR Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
+}
+function compPD() {
+    console.log("Pythagorean Distance");
+    let min = 1;
+    let minP = pythagoreanDistance(arr_imgs[0], arr_imgs[1]);
+    for (let i=2; i<count; i++) {
+        let d = pythagoreanDistance(arr_imgs[0], arr_imgs[i]);
+        if (d < minP) {
+            min = i;
+            minP = d;
+        }
+    }
+    console.log("PD Lowest: " + min);
+    console.log("PD Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
+}
+function compSDD() {
+    console.log("Scaled Dimensional Distance");
+    let min = 1;
+    let minP = scaledDimensionalDistance(arr_imgs[0], arr_imgs[1]);
+    for (let i=2; i<count; i++) {
+        let d = scaledDimensionalDistance(arr_imgs[0], arr_imgs[i]);
+        if (d < minP) {
+            min = i;
+            minP = d;
+        }
+    }
+    console.log("SDD Lowest: " + min);
+    console.log("SDD Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
+}
+function compSD() {
+    console.log("Spherical Distance");
+    let min = 1;
+    let minP = sphericalDistance(arr_imgs[0], arr_imgs[1]);
+    for (let i=2; i<count; i++) {
+        let d = sphericalDistance(arr_imgs[0], arr_imgs[i]);
+        if (d < minP) {
+            min = i;
+            minP = d;
+        }
+    }
+    console.log("SD Lowest: " + min);
+    console.log("SD Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
 }
 
 function test() {
@@ -184,15 +322,16 @@ function assembleAsync(data, base) {
         arr_imgs[count] = bufferToImage(data);
         count++;
     }
-    if (count == 800) {
+    if (count == IMG_COUNT) {
         compares();
     }
 }
 
-mnist(1000, true);
+mnist(GOAL_IMG, true);
 
 
-for (let i = 0; i<800; i++) {
+for (let i = 0; i<IMG_COUNT; i++) {
+    if (i == GOAL_IMG) {continue;}
     mnist(i, false);
 }
 
