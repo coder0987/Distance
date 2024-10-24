@@ -8,6 +8,7 @@ const SQRT2 = 1.41421356237;
 const IMG_COUNT = 1000;
 const GOAL_IMG = 1;
 
+//Iteratively finds the distance between active pixels, then removes pixels that have been used. Unused pixels count as 2
 function distanceStepRemoval(imgA, imgB) {
     //Each image is a HEIGHT x WIDTH array of values 0-255
     let activeA = [];
@@ -77,6 +78,8 @@ function pythagoreanDistance(imgA, imgB) {
     return Math.abs(aDistance - bDistance);
 }
 
+//Weight the height and width, count, and check. Fixes downside of pythagorean distance
+//Downside: clumped vs sparse values give similar totals and so have low edit distance
 function scaledDimensionalDistance(imgA, imgB) {
     let aDistance = [0,0,0,0];
     let bDistance = [0,0,0,0];
@@ -108,6 +111,8 @@ function scaledDimensionalDistance(imgA, imgB) {
     return Math.sqrt(Math.pow(aDistance[0] - bDistance[0], 2) + Math.pow(aDistance[1] - bDistance[1], 2) + Math.pow(aDistance[2] - bDistance[2], 2) + Math.pow(aDistance[3] - bDistance[3], 2));
 }
 
+//Place the image matrix on a 3d sphere and add up the normal vectors, then find the magnitude of the difference between normal vectors
+//Downside: sane as SDD, sparse and clumped values give similar totals
 function sphericalDistance(imgA, imgB) {
     let aDistance = [0,0,0];
     let bDistance = [0,0,0];
