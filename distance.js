@@ -1,12 +1,91 @@
 const fs = require('fs');
 
-const HEIGHT = 28;
-const WIDTH = 28;
+const HEIGHT = 2;
+const WIDTH = 2;
 const ACTIVE = 1;
 const SQRT2 = 1.41421356237;
 
 const IMG_COUNT = 1000;
-const GOAL_IMG = 240;
+const GOAL_IMG = 5;
+
+runTest();
+
+function runMNIST() {
+    mnist(GOAL_IMG, true);
+
+
+    for (let i = 0; i<IMG_COUNT; i++) {
+        if (i == GOAL_IMG) {continue;}
+        mnist(i, false);
+    }
+}
+
+function runTest() {
+    let tests = [
+        [[[0,0],[0,0]], [[0,0],[0,0]]],
+        [[[1,0],[0,0]], [[0,0],[0,0]]],
+        [[[0,1],[0,0]], [[0,0],[0,0]]],
+        [[[0,0],[1,0]], [[0,0],[0,0]]],
+        [[[0,0],[0,1]], [[0,0],[0,0]]],
+        [[[1,1],[1,1]], [[0,0],[0,0]]],
+        [[[1,1],[1,1]], [[1,1],[1,1]]],
+        [[[1,0],[1,0]], [[0,1],[0,1]]],
+    ]
+    for (let i in tests) {
+        console.log(tests[i]);
+        console.log(dynamicDistance(tests[i][0], tests[i][1]));
+    }
+}
+
+function dynamicDistance(imgA, imgB) {
+    let sol = new Array(HEIGHT + 1);
+    for (let r1=0; r1<=HEIGHT; r1++) {
+        sol[r1] = new Array(HEIGHT + 1);
+        for (let r2=0; r2<=HEIGHT; r2++) {
+            sol[r1][r2] = new Array(WIDTH + 1);
+            for (let c1=0; c1<=WIDTH; c1++) {
+                sol[r1][r2][c1] = new Array(WIDTH + 1).fill(0);
+            }
+        }
+    }
+    for (let i=0; i<HEIGHT; i++) {
+        sol[0][i][0][0] = i;
+        sol[i][0][0][0] = i;
+    }
+    for (let i=0; i<WIDTH; i++) {
+        sol[0][0][i][0] = i;
+        sol[0][0][0][i] = i;
+    }
+    for (let r1=1; r1<=HEIGHT; r1++) {
+        for (let r2=1; r2<=HEIGHT; r2++) {
+            for (let c1=1; c1<=WIDTH; c1++) {
+                for (let c2=1; c2<=WIDTH; c2++) {
+                    sol[r1][r2][c1][c2] = ((imgA[r1-1][c1-1] == imgB[r2-1][c2-1]) ? 
+                        sol[r1-1][r2-1][c1-1][c2-1] : 
+                        1 + Math.min(
+                            sol[r1-1][r2-1][c1-1][c2-1],
+                            sol[r1-1][r2-1][c1-1][c2],
+                            sol[r1-1][r2-1][c1][c2-1],
+                            sol[r1-1][r2-1][c1][c2],
+                            sol[r1-1][r2][c1-1][c2-1],
+                            sol[r1-1][r2][c1-1][c2],
+                            sol[r1-1][r2][c1][c2-1],
+                            sol[r1-1][r2][c1][c2],
+                            sol[r1][r2-1][c1-1][c2-1],
+                            sol[r1][r2-1][c1-1][c2],
+                            sol[r1][r2-1][c1][c2-1],
+                            sol[r1][r2-1][c1][c2],
+                            sol[r1][r2][c1-1][c2-1],
+                            sol[r1][r2][c1-1][c2],
+                            sol[r1][r2][c1][c2-1]
+                        )
+                    );
+                }
+            }
+        }
+    }
+    return sol[HEIGHT][HEIGHT][WIDTH][WIDTH];
+}
 
 
 //Sum the distances between each active pixel and the closest active pixel on the other image
@@ -234,6 +313,7 @@ function printSideBySideBinImg(imgA, imgB) {
 
 function compares() {
     printBinImg(arr_imgs[0])
+    compDD();
     compDS();
     compDSR();
     compED();
@@ -337,14 +417,21 @@ function compSD() {
     console.log("Image:");
     printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
 }
-
-function test() {
-    let i1 = [[255,0],[255,0]];
-    let i2 = [[0,255],[255,0]];
-    let srd = distanceStepRemoval(i1, i2);
-    let pd = pythagoreanDistance(i1, i2);
-    console.log("Step Removal Distance is " + srd);
-    console.log("Pythagorean Distance is " + pd);
+function compDD() {
+    console.log("Dynamic Distance");
+    let min = 1;
+    let minP = dynamicDistance(arr_imgs[0], arr_imgs[1]);
+    for (let i=2; i<count; i++) {
+        let d = dynamicDistance(arr_imgs[0], arr_imgs[i]);
+        if (d < minP) {
+            min = i;
+            minP = d;
+        }
+    }
+    console.log("DD Lowest: " + min);
+    console.log("DD Distance: " + minP);
+    console.log("Image:");
+    printSideBySideBinImg(arr_imgs[0],arr_imgs[min])
 }
 
 function printImage(bytes) {
@@ -424,11 +511,5 @@ function assembleAsync(data, base) {
     }
 }
 
-mnist(GOAL_IMG, true);
 
-
-for (let i = 0; i<IMG_COUNT; i++) {
-    if (i == GOAL_IMG) {continue;}
-    mnist(i, false);
-}
 
