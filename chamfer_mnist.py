@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+
+
 dataset = tf.keras.datasets.mnist
 (training_set, test_set) = dataset.load_data()
 (training_images, training_labels) = training_set
@@ -17,6 +19,7 @@ print("test images dtype:", test_images.dtype, "")
 print("test labels shape:", test_labels.shape, "")
 
 
+
 #%%
 
 training_index = 17
@@ -26,6 +29,7 @@ plt.imshow(example_image, cmap='gray')
 print("dtype:", example_image.dtype)
 print("shape:", example_image.shape)
 print("class label:", label)
+
 
 
 #%%
@@ -52,35 +56,35 @@ test_loss, test_acc = model.evaluate(test_inputs,  test_labels, verbose=0)
 print('\nTest accuracy: %.2f%%' % (test_acc * 100))
 """
 
-
-#Euclidean distance between two 2-dimensional points
-def point_distance(p1, p2):
-    return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
-
 def shortest_distance(point, points):
-    shortest_d = point_distance(point, (points[0][0], points[1][0]))
-    for i in range(len(points[0])):
-        dist = point_distance(point, (points[0][i], points[1][i]))
-        if (dist < shortest_d):
-            shortest_d = dist
-    return shortest_d
+    #finds the shortest Euclidean distance between a point and an array of points (x, y) and arr[(x,y),...]
+    return np.minimum.reduce(
+        np.sqrt(
+            np.add(
+                np.square(
+                    np.subtract(point[0], points.T[0])
+                ),
+                np.square(
+                    np.subtract(point[1], points.T[1])
+                )
+            )
+        )
+    )
 
-def directed_chamfer_distance(image1, image2):
-    #images are 2D numpy arrays of size 28x28
-    active1 = np.nonzero(image1) #tuple of type (array, array)
-    active2 = np.nonzero(image2)
-
+def directed_chamfer_distance(active1, active2):
+    #arrays of tuples (x, y)
     dist = 0
+    for el in active1:
+        dist += shortest_distance(el, active2)
 
-    for i in range(len(active1[0])):
-        dist += shortest_distance((active1[0][i], active1[1][i]), active2)
-
-    dist /= len(active1[0])
+    dist /= len(active1)
 
     return dist
 
 def chamfer_distance(image1, image2):
-    return directed_chamfer_distance(image1, image2) + directed_chamfer_distance(image2, image1)
+    active1 = np.transpose(np.nonzero(image1))
+    active2 = np.transpose(np.nonzero(image2))
+    return directed_chamfer_distance(active1, active2) + directed_chamfer_distance(active2, active1)
 
 def swim_up(heap, i):
     if (i == 0):
@@ -134,13 +138,11 @@ def knn_evaluate(test_set, test_labels, training_set, training_labels, k):
 
 #%%
 
-
 import time
 
 start = time.time()
 
-
-knn_evaluate(test_images[650:700:1], test_labels[650:700:1], training_images[625:700:1], training_labels[625:700:1], 1)
+knn_evaluate(test_images[650:700:1], test_labels[650:700:1], training_images[0:75:1], training_labels[0:75:1], 5)
 
 elapsed_time = time.time() - start
 
