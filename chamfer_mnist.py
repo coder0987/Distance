@@ -18,7 +18,7 @@ class DistanceFunction(Enum):
 DISTANCE_FUNCTION = DistanceFunction.CHAMFER_TRANSFORMED
 LOAD_IMGS = True
 RESET_JAVA = True # MUST BE TRUE IF M/N ARE ADJUSTED
-K = 7
+K = 1
 
 N = 60000 # of training examples, up to 60k
 M = 10000 # of test cases, up to 10k

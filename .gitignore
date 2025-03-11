@@ -1,3 +1,4 @@
 *.class
 *.jar
 *.idx3-ubyte
+.vscode
