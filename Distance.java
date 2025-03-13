@@ -64,6 +64,14 @@ public class Distance {
         System.out.println("Loaded training images");
     }
 
+    public void loadTestLabels(byte[] pre_test_labels) {
+        System.arraycopy(pre_test_labels, 0, testLabels, 0, pre_test_labels.length);
+    }
+
+    public void loadTrainingLabels(byte[] pre_train_labels) {
+        System.arraycopy(pre_train_labels, 0, trainingLabels, 0, pre_train_labels.length);
+    }
+
     @SuppressWarnings("CallToPrintStackTrace")
     public byte[] distance_transform() {
         if (testImages == null) {
@@ -129,7 +137,7 @@ public class Distance {
         return trainingReturn;
     }
 
-    public static byte[][] transform(byte[][] image) {
+    private static byte[][] transform(byte[][] image) {
         ArrayList<ByteTuple> active = new ArrayList<>();
         byte[][] transformedImage = new byte[28][28];
         
@@ -164,7 +172,7 @@ public class Distance {
         return transformedImage;
     }
 
-    public static ByteTuple first(byte[][] image) {
+    private static ByteTuple first(byte[][] image) {
         //Returns a potential first point for farthest geodesic distance
         for (byte row = 0; row < IMG_WIDTH; row++) {
             for (byte col = 0; col < IMG_WIDTH; col++) {
@@ -176,7 +184,7 @@ public class Distance {
         return null;
     }
 
-    public static ByteTuple farthestBFS(byte[][] img, ByteTuple start) {
+    private static ByteTuple farthestBFS(byte[][] img, ByteTuple start) {
         Queue<ByteTuple> q = new LinkedList<>();
         byte[][] exploration = new byte[IMG_SIZE][IMG_SIZE];
 
@@ -218,7 +226,7 @@ public class Distance {
         return closest;
     }
 
-    public static EdgePath edgeTransform(byte[][] img) {
+    private static EdgePath edgeTransform(byte[][] img) {
         ByteTuple firstPoint = first(img);
         ByteTuple start = farthestBFS(img, firstPoint);
         ByteTuple end = farthestBFS(img, start);
@@ -322,7 +330,7 @@ public class Distance {
         System.out.println("Edge transformed test images");
     }
 
-    public static byte dynamicTimeWarp(EdgePath e1, EdgePath e2) {
+    private static byte dynamicTimeWarp(EdgePath e1, EdgePath e2) {
         //Use DTW to find the distance between the two edgepaths
         /**
          * Step 1: Determine endpoints
@@ -385,6 +393,6 @@ class ByteTupleComparator implements Comparator<ByteTuple>
     @Override
     public int compare(ByteTuple i1, ByteTuple i2)
     {
-        return Byte.compare(i1.first, i2.first);
+        return Byte.compareUnsigned(i1.first, i2.first);
     }
 }
