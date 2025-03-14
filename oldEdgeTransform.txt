@@ -1,0 +1,124 @@
+do {
+            exploredEdges[current.first][current.second] = 1;
+            path.edges.add(current);
+            //Check surrounding nodes, starting at left and going counter-clockwise
+            if (current.first % 2 == 0) {
+                //Current is a horizontal edge
+                /*6 Options to continue:
+                    _|_|_
+                     | |
+                    Each option has two possibilities:
+                    11|00
+                    or
+                    00|11
+
+                    aka
+                    11|
+                    |11
+                */
+                /*
+                 * Three requirements must be met:
+                 * 1. The edge is possible
+                 * 2. The edge is unexplored
+                 * 3. The image has an active pixel on one side an and inactive pixel on the other
+                 *  3.1 Pixel A is active and Pixel B is (off the image or inactive)
+                 *  3.2 Pixel C is active and Pixel A is (off the image or inactive)
+                 */
+                if (current.second > 1 && 
+                    exploredEdges[current.first][current.second - 2] == 0 && 
+                    (
+                        (img[current.first / 2][current.second / 2 - 1] == 1 &&                             //Pixel BELOW current edge, to the left one
+                        (current.first == 0 || img[current.first / 2 - 1][current.second / 2 - 1] == 0))    //Pixel ABOVE that one ^
+                        ||
+                        (img[current.first / 2 - 1][current.second / 2 - 1] == 1 &&                         //Pixel ABOVE current edge, to the left one
+                        (current.first == EDGE_WIDTH - 1 || (img[current.first / 2 + 1][current.second / 2 - 1] == 0)))//Pixel BELOW that one ^
+                    )) {
+                    // >_|_|_ points towards new edge
+                    /*
+                     00 or 11 or 11 (bottom or top of image)
+                     11    00
+                     */
+                    current.second -= 2;
+                } else if (current.second < EDGE_WIDTH - 2 && 
+                    exploredEdges[current.first][current.second + 2] == 0 && 
+                    (img[current.first / 2][current.second / 2 + 1] == 1 ? 
+                        (current.first == 0 || img[current.first / 2 - 1][current.second / 2 - 1] == 0) :
+                        (current.first == 0 || img[current.first / 2 - 1][current.second / 2 - 1] == 1))) {
+                    // _|_|_< points towards new edge
+                    current.second += 2;
+                } else if (current.first > 0 && 
+                    exploredEdges[current.first - 1][current.second - 1] == 0 && 
+                    (img[current.first / 2 - 1][current.second / 2] == 1 ? 
+                        (current.second == 1 || img[current.first / 2 - 1][current.second / 2 - 1] == 0) :
+                        (current.second == 1 || img[current.first / 2 - 1][current.second / 2 - 1] == 1))) {
+                    // _>|_|_ points towards new edge
+                    current.first -= 1;
+                    current.second -= 1;
+                } else if (current.first > 0 && exploredEdges[current.first - 1][current.second + 1] == 0 && img[current.first / 2 - 1][current.second / 2] == 1 && (current.second == EDGE_WIDTH - 2 || img[current.first / 2 - 1][current.second / 2 + 1] == 0)) {
+                    // _|_|<_ points towards new edge
+                    current.first -= 1;
+                    current.second += 1;
+                } else if (current.first < EDGE_WIDTH - 1 && exploredEdges[current.first + 1][current.second - 1] == 0 && img[current.first / 2 + 1][current.second / 2] == 1 && (current.second == 1 || img[current.first / 2 + 1][current.second / 2 - 1] == 0)) {
+                    // _|_|_ points towards new edge
+                    // >| |
+                    current.first += 1;
+                    current.second -= 1;
+                } else if (current.first < EDGE_WIDTH - 1 && exploredEdges[current.first + 1][current.second + 1] == 0 && img[current.first / 2 + 1][current.second / 2] == 1 && (current.second == EDGE_WIDTH - 2 || img[current.first / 2 + 1][current.second / 2 + 1] == 0)) {
+                    // _|_|_ points towards new edge
+                    //  | |<
+                    current.first += 1;
+                    current.second += 1;
+                } else {
+                    //oopsie. No path to continue
+                    System.out.println("No path to continue.");
+                    printImg(img);
+                    printImg(exploredEdges);
+                    System.out.println("Row: " + current.first + " Col: " + current.second);
+                    throw new Error("No path to continue");
+                }
+            } else {
+                //Current is a vertical edge
+                /*6 Options to continue:
+                    _|_
+                    _|_
+                     |
+                */
+                if (current.second > 1 && exploredEdges[current.first - 1][current.second - 1] == 0 && img[current.first / 2][current.second / 2 - 1] == 1 && (current.first == 1 || img[current.first / 2 - 1][current.second / 2 - 1] == 0)) {
+                    // >_|_ points towards new edge
+                    /*
+                     00 edge is between the 0s and 1s, going up and left
+                     10
+                     */
+                    current.second -= 2;
+                } else if (current.second < EDGE_WIDTH - 2 && exploredEdges[current.first][current.second + 2] == 0 && img[current.first / 2][current.second / 2 + 1] == 1 && (current.first == 0 || img[current.first / 2 - 1][current.second / 2 + 1] == 0)) {
+                    // _|_|_< points towards new edge TODO I STOPPED HERE
+                    current.second += 2;
+                } else if (current.first > 0 && exploredEdges[current.first - 1][current.second - 1] == 0 && img[current.first / 2 - 1][current.second / 2] == 1 && (current.second == 1 || img[current.first / 2 - 1][current.second / 2 - 1] == 0)) {
+                    // _>|_|_ points towards new edge
+                    current.first -= 1;
+                    current.second -= 1;
+                } else if (current.first > 0 && exploredEdges[current.first - 1][current.second + 1] == 0 && img[current.first / 2 - 1][current.second / 2] == 1 && (current.second == EDGE_WIDTH - 2 || img[current.first / 2 - 1][current.second / 2 + 1] == 0)) {
+                    // _|_|<_ points towards new edge
+                    current.first -= 1;
+                    current.second += 1;
+                } else if (current.first < EDGE_WIDTH - 1 && exploredEdges[current.first + 1][current.second - 1] == 0 && img[current.first / 2 + 1][current.second / 2] == 1 && (current.second == 1 || img[current.first / 2 + 1][current.second / 2 - 1] == 0)) {
+                    // _|_|_ points towards new edge
+                    // >| |
+                    current.first += 1;
+                    current.second -= 1;
+                } else if (current.first < EDGE_WIDTH - 1 && exploredEdges[current.first + 1][current.second + 1] == 0 && img[current.first / 2 + 1][current.second / 2] == 1 && (current.second == EDGE_WIDTH - 2 || img[current.first / 2 + 1][current.second / 2 + 1] == 0)) {
+                    // _|_|_ points towards new edge
+                    //  | |<
+                    current.first += 1;
+                    current.second += 1;
+                } else {
+                    //oopsie. No path to continue
+                    System.out.println("No path to continue.");
+                    printImg(img);
+                    printImg(exploredEdges);
+                    System.out.println("Row: " + current.first + " Col: " + current.second);
+                    throw new Error("No path to continue");
+                }
+            }
+
+        } while (current.first != start.first || current.second != start.second); //Go until we reach the start again

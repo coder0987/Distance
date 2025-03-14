@@ -14,13 +14,14 @@ class DistanceFunction(Enum):
     EUCLIDEAN = 0
     CHAMFER = 1
     CHAMFER_TRANSFORMED = 2
+    DTW = 3
 
-DISTANCE_FUNCTION = DistanceFunction.CHAMFER_TRANSFORMED
+DISTANCE_FUNCTION = DistanceFunction.DTW
 LOAD_IMGS = True
 RESET_JAVA = True # MUST BE TRUE IF M/N ARE ADJUSTED
 K = 1
 
-N = 60000 # of training examples, up to 60k
+N = 50 # of training examples, up to 60k
 M = 10000 # of test cases, up to 10k
 
 IMG_SIZE = 784 # 28 ** 2
@@ -233,6 +234,11 @@ if DISTANCE_FUNCTION == DistanceFunction.CHAMFER_TRANSFORMED:
     distance_transform_imgs = np.reshape(np.frombuffer(java_distance.distance_transform(), dtype=np.uint8), (M, 28, 28))
     distance_transform_training_imgs = np.reshape(np.frombuffer(java_distance.distance_transform_training(), dtype=np.uint8), (N, 28, 28))
     dist_func = chamfer_distance_transformed
+elif DISTANCE_FUNCTION == DistanceFunction.DTW:
+    java_distance.edge_transform_test_images()
+    java_distance.edge_transform_training_images()
+    java_distance.loadTestLabels(labels.tobytes())
+    java_distance.loadTrainingLabels(train_labels.tobytes())
 else:
     distance_transform_imgs = pre_imgs
     distance_transform_training_imgs = pre_train_imgs
@@ -245,9 +251,15 @@ print_time(pre_start, time.time(), "Preprocessing")
 
 start = time.time()
 
-#print(distance_transform_imgs[0])
+#debug
+time.sleep(5)
+for i in range(M):
+    java_distance.debug(i)
 
-if LOAD_IMGS:
+#print(distance_transform_imgs[0])
+if DISTANCE_FUNCTION == DistanceFunction.DTW:
+    java_distance.knn_evaluate(K)
+elif LOAD_IMGS:
     knn_evaluate(distance_transform_imgs, labels, distance_transform_training_imgs, train_labels, K)
 
 print_time(start, time.time(), "Evaluation")
