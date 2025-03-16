@@ -1,9 +1,18 @@
+
 public class test {
     public static void main(String[] args) {
-        byte one = (byte) 0x0f;
-        byte two = (byte) 0xff;
-        System.out.println(Byte.compareUnsigned(one, two) > 0);
-        byte smaller = (Byte.compareUnsigned(one, two) > 0 ? two : one);
-        System.out.println(smaller);
+        EdgePath e = new EdgePath(new ByteTuple((byte)0,(byte)0), new ByteTuple((byte)10,(byte)10));
+        for (byte i=0; i<20; i++) {
+            e.edges.add(new ByteTuple(i,i));
+        }
+        e.wrap();
+        for (ByteTuple b : e.edges) {
+            System.out.println(b.first + ", " + b.second);
+        }
+        System.out.println("");
+        e.wrap();
+        for (ByteTuple b : e.edges) {
+            System.out.println(b.first + ", " + b.second);
+        }
     }
 }

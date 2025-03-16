@@ -1,9 +1,13 @@
+import java.awt.EventQueue;
 import py4j.GatewayServer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
+import javax.swing.DebugGraphics;
 
 public class Distance {
     byte[][][] testImages;
@@ -33,17 +37,17 @@ public class Distance {
 
     public void debug(int i) {
         if (testLabels != null && testImages != null && testEdgeReturn != null) {
-            debugPrint(testLabels[i], testImages[i], testEdgeReturn[i]);
+            DebugPrint.debugPrint(testLabels[i], testImages[i], testEdgeReturn[i]);
             return;
         }
         if (testLabels != null) {
             System.out.println(testLabels[i]);
         }
         if (testImages != null) {
-            printImg(testImages[i]);
+            DebugPrint.printImg(testImages[i]);
         }
         if (testEdgeReturn != null) {
-            printEdgePath(testEdgeReturn[i]);
+            DebugPrint.printEdgePath(testEdgeReturn[i]);
         }
     }
 
@@ -369,7 +373,7 @@ public class Distance {
         path.produceEdgePathDFSDirected(img, exploredEdges, start, 0);
 
         if (!path.listIncludes(end, 1)) {
-            System.out.println("End not present, retrying!");
+            //System.out.println("End not present, retrying!");
             //End is not present, bloat the image and try again
             return edgeTransform(bloat(img));
         }
@@ -380,21 +384,19 @@ public class Distance {
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public byte knnEdgeTransformed(byte[] args) {
-        byte index = args[0];
-        byte k = args[1];
+    private byte knnEdgeTransformed(int index, int k) {
         //Find knn for test against all training data
 
         //All are transformed and stored in EdgePath[] testEdgeReturn and trainingEdgeReturn
-
         EdgePath edge = testEdgeReturn[index];
 
         //Step 1: test against each training and store distance
-        ByteTuple[] distNum = new ByteTuple[trainingEdgeReturn.length];
-        Thread[] threads = new Thread[trainingEdgeReturn.length];
+        IntTuple[] distNum = new IntTuple[trainingImages.length];
+        Thread[] threads = new Thread[trainingImages.length];
 
-        for (int i=0; i<testImages.length; i++) {
+        for (int i=0; i<trainingImages.length; i++) {
             final int idx = i;
+            distNum[idx] = new IntTuple();
             distNum[idx].second = trainingLabels[idx];
 
             threads[idx] = new Thread(() -> {
@@ -411,9 +413,16 @@ public class Distance {
             e.printStackTrace();
         }
 
+        /*
+        for (int i=0; i<trainingImages.length; i++) {
+            DebugPrint.debugPrint(trainingLabels[i], testImages[0], trainingEdgeReturn[i]);
+            System.out.println("Distance: " + distNum[i].first);
+        }
+         */
+
         //Step 2: find the largest k values
-        PriorityQueue<ByteTuple> min = new PriorityQueue<>(new ByteTupleComparator());
-        for (ByteTuple it : distNum) {
+        PriorityQueue<IntTuple> min = new PriorityQueue<>(new IntTupleComparator());
+        for (IntTuple it : distNum) {
             min.add(it);
             if (min.size() > k) {
                 min.remove();
@@ -423,15 +432,15 @@ public class Distance {
 
         //Step 3: return the most common among the top k
         byte[] top = new byte[10];
-        byte best = 0;
-        for (ByteTuple it : min) {
+        int best = 0;
+        for (IntTuple it : min) {
             top[it.second]++;
             if (top[it.second] > top[best]) {
                 best = it.second;
             }
         }
 
-        return best;
+        return (byte)best;
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
@@ -502,67 +511,116 @@ public class Distance {
 
     public void knn_evaluate(int K) {
         //Called by Python
+        System.out.println("Evaluating!");
+        int correct = 0;
+        int incorrect = 0;
+    
+        for (int i=0; i<testEdgeReturn.length; i++) {
+            byte classification = knnEdgeTransformed(i, K);
+            if (classification == testLabels[i])
+                correct+=1;
+            else
+                incorrect+=1;
+            System.out.println("Test image " + i + ", k=" + K + ", knn estimated label: " + classification + ", true label " + testLabels[i]);
+        
+        
+        }
+        System.out.println("Classified correctly " + correct + " out of " + (correct + incorrect) + " images, accuracy = " + ((double)correct / (correct + incorrect) * 100));
     }
 
-    private static byte dynamicTimeWarp(EdgePath e1, EdgePath e2) {
+    /** Multithreaded version
+     
+        @SuppressWarnings("CallToPrintStackTrace")
+    public void knn_evaluate(int K) {
+        //Called by Python
+        System.out.println("Evaluating!");
+        int correct = 0;
+        int incorrect = 0;
+
+        Thread[] threads = new Thread[testImages.length];
+        byte[] classifications = new byte[testImages.length];
+
+        for (int i=0; i<testImages.length; i++) {
+            final int idx = i;
+
+            threads[idx] = new Thread(() -> {
+                classifications[idx] = knnEdgeTransformed(idx, K);
+                System.out.println(idx + " finished");
+            });
+            threads[i].start();
+        }
+
+        try {
+            for (Thread thread : threads) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    
+        for (int i=0; i<classifications.length; i++) {
+            if (classifications[i] == testLabels[i])
+                correct+=1;
+            else
+                incorrect+=1;
+        }
+        System.out.println("Classified correctly " + correct + " out of " + (correct + incorrect) + " images, accuracy = " + ((double)correct / (correct + incorrect) * 100));
+    }
+     */
+
+    private static int dynamicTimeWarp(EdgePath e1, EdgePath e2) {
         //Use DTW to find the distance between the two edgepaths
         /**
          * Step 1: Determine endpoints
          * Step 2: DTW loop around the whole edge path
-         * Step 3: Return the calculated distance as a byte
+         * Step 3: Return the calculated distance as an int
          */
 
+        int ss = e1.start.distance(e2.start);
+        int se = e1.start.distance(e2.end);
+        int es = e1.end.distance(e2.start);
+        int ee = e1.end.distance(e2.end);
+
+        int min = Math.min(Math.min(ss, se), Math.min(es, ee));
+
+        if (se == min) {
+            //Invert e2
+            e2.wrap();
+        } else if (es == min) {
+            //Invert e1
+            e1.wrap();
+        } else if (ee == min) {
+            //Invert both
+            e1.wrap();
+            e2.wrap();
+        }
+
+        //Convert to arrays for iterating
+        ByteTuple[] firstEdges = (ByteTuple[])e1.edges.toArray(ByteTuple[]::new);
+        ByteTuple[] secondEdges = (ByteTuple[])e2.edges.toArray(ByteTuple[]::new);
+
+        double[][] DTW = new double[firstEdges.length + 1][secondEdges.length + 1];
+
+        for (int row = 0; row < DTW.length; row++) {
+            for (int col = 0; col < DTW[row].length; col++) {
+                DTW[row][col] = Integer.MAX_VALUE / 2; // divide by 2 to prevent integer overflow errors (hopefully)
+            }
+        }
+
+        DTW[0][0] = 0;
 
 
-        return 0;
-    }
-
-    public static void printImg(byte[][] img) {
-        for (byte[] row : img) {
-            for (byte pixel : row) {
-                if (pixel == 0) {
-                    System.out.print(" ");
-                } else {
-                    System.out.print((int) pixel);
+        for (int i=1; i<DTW.length; i++) {
+            for (int j=1; j<DTW[0].length; j++) {
+                int cost = firstEdges[i - 1].distance(secondEdges[j - 1]);
+                DTW[i][j] = cost + Math.min(Math.min(DTW[i-1][j], DTW[i][j-1]),DTW[i-1][j-1]);
+                if (DTW[i][j] < 0) {
+                    throw new Error("Negative!");
                 }
             }
-            System.out.println();
-        }
-    }
-
-    private static void printEdgePath(EdgePath e) {
-        byte[][] img = new byte[IMG_WIDTH][IMG_WIDTH];
-        for (ByteTuple b : e.edges) {
-            img[b.first][b.second] = 1;
-        }
-        printImg(img);
-    }
-
-    private static void debugPrint(byte label, byte[][] img, EdgePath e) {
-        byte[][] timg = new byte[IMG_WIDTH][IMG_WIDTH];
-        for (ByteTuple b : e.edges) {
-            timg[b.first][b.second] = 1;
         }
 
-        System.out.println(label);
-        for (int row=0; row<IMG_WIDTH; row++) {
-            for (byte pixel : img[row]) {
-                if (pixel == 0) {
-                    System.out.print(" ");
-                } else {
-                    System.out.print((int) pixel);
-                }
-            }
-            System.out.print(" | ");
-            for (byte pixel : timg[row]) {
-                if (pixel == 0) {
-                    System.out.print(" ");
-                } else {
-                    System.out.print((int) pixel);
-                }
-            }
-            System.out.println();
-        }
+        return (int)DTW[firstEdges.length][secondEdges.length];
     }
 
     public static void main(String[] args) {
@@ -590,6 +648,35 @@ class ByteTuple {
         return (byte) Math.sqrt(Math.pow(first - x, 2) + Math.pow(second - y, 2));
     }
 
+    public byte distance(ByteTuple b2) {
+        return (byte) Math.sqrt(Math.pow(first - b2.first, 2) + Math.pow(second - b2.second, 2));
+    }
+
+    public boolean equals(ByteTuple o) {
+        return first == o.first && second == o.second;
+    }
+    
+}
+
+class IntTuple {
+    public int first;
+    public int second;
+    public IntTuple(int x, int y) {
+        first = x;
+        second = y;
+    }
+    public IntTuple() {
+        first = 0;
+        second = 0;
+    }
+    public double distance(byte x, byte y) {
+        return Math.sqrt(Math.pow(first - x, 2) + Math.pow(second - y, 2));
+    }
+
+    public double distance(IntTuple b2) {
+        return Math.sqrt(Math.pow(first - b2.first, 2) + Math.pow(second - b2.second, 2));
+    }
+
     public boolean equals(ByteTuple o) {
         return first == o.first && second == o.second;
     }
@@ -597,13 +684,20 @@ class ByteTuple {
 }
 
 class EdgePath {
-    public ArrayList<ByteTuple> edges;
+    public LinkedBlockingDeque<ByteTuple> edges;
     public ByteTuple start;
     public ByteTuple end;
     public EdgePath(ByteTuple first, ByteTuple mid) {
         start = first;
         end = mid;
-        edges = new ArrayList<>();
+        edges = new LinkedBlockingDeque<>();
+    }
+
+    public void wrap() {
+        //Rotate the list so that it starts at end
+        while (edges.getFirst().distance(end) > 1) {
+            edges.addLast(edges.pop());
+        }
     }
 
     //Check the pixels next to the current pixel first, then pixels at diagonal
@@ -728,11 +822,67 @@ class ImageTools {
     }
 }
 
-class ByteTupleComparator implements Comparator<ByteTuple>
+class IntTupleComparator implements Comparator<IntTuple>
 {
     @Override
-    public int compare(ByteTuple i1, ByteTuple i2)
+    public int compare(IntTuple i1, IntTuple i2)
     {
-        return Byte.compareUnsigned(i1.first, i2.first);
+        return Integer.compare(i2.first, i1.first);
+    }
+}
+
+class DebugPrint {
+    public static void printList(LinkedBlockingDeque<ByteTuple> list) {
+        for (ByteTuple b : list) {
+            System.out.print("(" + b.first + ", " + b.second + ") ");
+        }
+        System.out.println("");
+    }
+    public static void printImg(byte[][] img) {
+        for (byte[] row : img) {
+            for (byte pixel : row) {
+                if (pixel == 0) {
+                    System.out.print(" ");
+                } else {
+                    System.out.print((int) pixel);
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public static void printEdgePath(EdgePath e) {
+        byte[][] img = new byte[Distance.IMG_WIDTH][Distance.IMG_WIDTH];
+        for (ByteTuple b : e.edges) {
+            img[b.first][b.second] = 1;
+        }
+        printImg(img);
+    }
+
+    public static void debugPrint(byte label, byte[][] img, EdgePath e) {
+        byte[][] timg = new byte[Distance.IMG_WIDTH][Distance.IMG_WIDTH];
+        for (ByteTuple b : e.edges) {
+            timg[b.first][b.second] = 1;
+        }
+
+        System.out.println(label);
+        for (int row=0; row<Distance.IMG_WIDTH; row++) {
+            for (byte pixel : img[row]) {
+                if (pixel == 0) {
+                    System.out.print(" ");
+                } else {
+                    System.out.print((int) pixel);
+                }
+            }
+            System.out.print(" | ");
+            for (byte pixel : timg[row]) {
+                if (pixel == 0) {
+                    System.out.print(" ");
+                } else {
+                    System.out.print((int) pixel);
+                }
+            }
+            System.out.println();
+        }
     }
 }

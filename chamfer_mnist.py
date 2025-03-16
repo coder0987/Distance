@@ -21,7 +21,7 @@ LOAD_IMGS = True
 RESET_JAVA = True # MUST BE TRUE IF M/N ARE ADJUSTED
 K = 1
 
-N = 50 # of training examples, up to 60k
+N = 60000 # of training examples, up to 60k
 M = 10000 # of test cases, up to 10k
 
 IMG_SIZE = 784 # 28 ** 2
@@ -249,12 +249,12 @@ if DISTANCE_FUNCTION == DistanceFunction.CHAMFER:
 print_time(pre_start, time.time(), "Preprocessing")
 
 
+time.sleep(20)
+
 start = time.time()
 
 #debug
-time.sleep(5)
-for i in range(M):
-    java_distance.debug(i)
+
 
 #print(distance_transform_imgs[0])
 if DISTANCE_FUNCTION == DistanceFunction.DTW:
