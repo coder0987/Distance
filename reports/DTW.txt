@@ -1,0 +1,6 @@
+Preprocessing finished in 0.000000 min, 13.437323 sec, 437.323093 ms
+Evaluation finished in 537.000000 min, 11.096034 sec, 96.034050 ms
+
+Classified correctly 9446 out of 10000 images, accuracy = 94.46
+
+k=1, 10000 test, 60000 training
